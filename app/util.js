@@ -1,6 +1,23 @@
 const nodemailer = require("nodemailer");
+const fs = require("fs").promises;
+const path = require("path");
 
-function sendEmail(recipients, users, operation, fileName) {
+const EMAIL_PATH = path.join(process.cwd(), "email.json");
+
+async function sendEmail(recipients, users, operation, fileName) {
+  let credentials = null;
+  try {
+    const content = await fs.readFile(EMAIL_PATH);
+    credentials = JSON.parse(content);
+  } catch (err) {
+    throw err;
+  }
+
+  if (credentials.email == undefined || credentials.appPassword == undefined) {
+    console.log("Email or App Password not set in email.json");
+    return;
+  }
+
   recipients.forEach((recipient) => {
     users.forEach((user) => {
       const message = `${user.displayName} (${user.emailAddress}) was ${operation} the file: ${fileName}`;
@@ -8,8 +25,8 @@ function sendEmail(recipients, users, operation, fileName) {
       const transporter = nodemailer.createTransport({
         service: "Gmail", // You can use other email services as well
         auth: {
-          user: "sev.keoss@gmail.com",
-          pass: "qeus tgew mdbg vksg",
+          user: credentials.email,
+          pass: credentials.appPassword,
         },
       });
 

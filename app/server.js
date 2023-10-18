@@ -14,9 +14,6 @@ const PORT = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const nodemailer = require("nodemailer");
-const cron = require("node-cron");
-
 app.get("/list-files", async (_, res) => {
   try {
     const client = await authorize();

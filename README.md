@@ -20,7 +20,7 @@ Finally, users who subscribe to a specific file will receive notifications when 
 
 7. Go to the strac-server.zip folder. To unzip the folder, you can right click on the folder and click "unzip" or go to the terminal and run `unzip strac-server.zip`
 
-8. Copy the "credentials.json" file inside the strac-server folder.
+8. Go inside the strac-server folder and copy the "credentials.json" file inside.
 
 9. Go to the "email.json" file and set "email" of your choice and "appPassword" from before. This is used to send emails to customers.
 

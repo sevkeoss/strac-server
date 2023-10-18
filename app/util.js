@@ -32,7 +32,7 @@ async function sendEmail(recipients, users, operation, fileName) {
 
       // Function to send the push email
       const mailOptions = {
-        from: "sev.keoss@gmail.com",
+        from: credentials.email,
         to: recipient,
         subject: `Notification: File Access Changed - ${fileName}`,
         text: message,

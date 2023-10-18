@@ -18,7 +18,7 @@ Finally, users who subscribe to a specific file will receive notifications when 
 
 6. You need to install nodejs on the system. You can follow this link: [Install NodeJS](https://nodejs.org/en)
 
-7. Go to the strac-server.zip folder. To unzip the folder, you can right click on the folder and click "unzip" or go to the terminal and run `unzip strac-server.zip`
+7. Download the project from github. `git clone git@github.com:sevkeoss/strac-server.git`.
 
 8. Go inside the strac-server folder and copy the "credentials.json" file inside.
 

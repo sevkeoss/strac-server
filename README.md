@@ -22,9 +22,11 @@ Finally, users who subscribe to a specific file will receive notifications when 
 
 8. Copy the "credentials.json" file inside the strac-server folder.
 
-9. Go to the "email.json" and set "email" of your choice and "appPassword" from before. This is used to send emails to customers.
+9. Go to the "email.json" file and set "email" of your choice and "appPassword" from before. This is used to send emails to customers.
 
-10. Run `node app/server.js`. For the first time, it should bring a pop up that you need to go through to give google drive api access to the google drive. After you run this, a "token.json" file should be created and the server should start.
+10. Run `npm install` in the terminal to install all the necessary packages.
+
+11. Run `node app/server.js` in the terminal. For the first time (i.e. you don't see a "token.json" file), it should bring a pop up that you need to go through to give google drive api access to the google drive. After you run this, a "token.json" file should be created and the server should start.
 
 #### APIs
 

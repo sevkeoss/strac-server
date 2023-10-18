@@ -35,20 +35,33 @@ Finally, users who subscribe to a specific file will receive notifications when 
   - Arguments: None
   - Response: List containing various file names and their id
 
+  Example: http://localhost:3000/list-files
+
 - DownloadFile - /download/\<fileId\>
 
   - Argument: Id of file to download
   - Response: File
 
-- ListPermission - /permission/\<fileId\>
+  Example: http://localhost:3000/download/1234
+
+- ListPermission - /permissions/\<fileId\>
 
   - Argument: Id of file to get permissions of
   - Response: Permissions of all users on the file
 
+  Example: http://localhost:3000/permissions/1234
+
 - Subscribe - /subsribe/\<fileId\>
+
   - Argument: Id of file to subscribe to.
   - Request body: Email to send notifications to
   - Response: Success/Failure
+
+    Example:
+    http://localhost:3000/subscribe/1234
+    {
+    "email": "sample@test.com"
+    }
 
 #### Design Decisions
 

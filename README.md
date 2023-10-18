@@ -67,6 +67,8 @@ Finally, users who subscribe to a specific file will receive notifications when 
 
 - For interacting with most of the APIs, you need the file id. The id for a file can be obtained after calling the list-files API.
 
+- ListFiles will return all the files in the google drive. If there's a lot of files, it will take a bit of time.
+
 - For downloading files, currently on text files are supported. It's not possible to download a .mp4 file for example. In addition, the files are exported and downloaded as .pdf files.
 
 - To test downloading files, you need to use the browser.

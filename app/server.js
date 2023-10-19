@@ -72,8 +72,8 @@ app.post("/changes", async (req, res) => {
   const headers = req.headers;
 
   if (headers["x-goog-resource-state"] === "update") {
-    const changes = headers["x-goog-changed"].split(",");
-    if (changes.includes("permissions")) {
+    const states = headers["x-goog-changed"].split(",");
+    if (states.includes("permissions")) {
       const fileId = extractFileId(headers["x-goog-resource-uri"]);
       if (fileId == undefined) {
         res.status(400).send("FileId not provided");

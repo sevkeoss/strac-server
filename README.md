@@ -28,7 +28,7 @@ Finally, users who subscribe to a specific file will receive notifications when 
 
 11. Create an "email.json" file and set "email" of your choice and "appPassword" from before. This is used to send emails to customers.
 
-12. Then, create a "ngrok.json" file and set the "ngrok" value to the be the forwarding url you got after running the `ngrok http 3000` command.
+12. Then, create a "ngrok.json" file and set the "ngrok" value to the be the forwarding url you got after running the `ngrok http 3000` command. At the end of the url, add "/changes".
 
 13. Run `npm install` in the terminal to install all the necessary packages.
 

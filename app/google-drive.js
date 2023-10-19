@@ -156,6 +156,7 @@ async function subscribe(client, fileId, email) {
   }
 }
 
+let token = null;
 async function register(client, fileId) {
   const drive = google.drive({ version: "v3", auth: client });
 
@@ -185,34 +186,47 @@ async function register(client, fileId) {
   };
 
   await drive.files.watch(watchReq);
+  if (token == null) {
+    token = (await drive.changes.getStartPageToken()).data.startPageToken;
+  }
+}
+
+async function getChanges(client) {
+  const drive = google.drive({ version: "v3", auth: client });
+
+  try {
+    const watchRequest = {
+      pageToken: token,
+    };
+    const changes = await drive.changes.list(watchRequest);
+
+    if (changes.length != 0) {
+      token = (await drive.changes.getStartPageToken()).data.startPageToken;
+    }
+
+    return changes.data.changes;
+  } catch (err) {
+    return [];
+  }
 }
 
 async function notifyChanges(fileId) {
   const client = await authorize();
+  const changes = await getChanges(client);
 
-  if (subs[fileId]) {
-    const newPermissions = await getPermissions(client, fileId);
+  changes.forEach(async (change) => {
+    if (change.fileId === fileId && subs[fileId]) {
+      const newPermissions = await getPermissions(client, fileId);
 
-    const added = findDifferenceByEmail(newPermissions, state[fileId]);
-    const removed = findDifferenceByEmail(state[fileId], newPermissions);
+      const added = findDifferenceByEmail(newPermissions, state[fileId]);
+      const removed = findDifferenceByEmail(state[fileId], newPermissions);
 
-    const name = await getFileName(client, fileId);
-    sendEmail(subs[fileId], added, "added to", name);
-    sendEmail(subs[fileId], removed, "removed from", name);
+      sendEmail(subs[fileId], added, "added to", change.file.name);
+      sendEmail(subs[fileId], removed, "removed from", change.file.name);
 
-    state[fileId] = newPermissions;
-  }
-}
-
-async function getFileName(client, fileId) {
-  const drive = google.drive({ version: "v3", auth: client });
-
-  const response = await drive.files.get({
-    fileId,
-    fields: "name",
+      state[fileId] = newPermissions;
+    }
   });
-
-  return response.data.name;
 }
 
 module.exports = {

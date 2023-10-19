@@ -79,7 +79,6 @@ app.post("/changes", async (req, res) => {
         res.status(400).send("FileId not provided");
         return;
       }
-      console.log(headers);
       await notifyChanges(fileId);
     }
   }

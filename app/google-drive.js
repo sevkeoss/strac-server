@@ -3,7 +3,8 @@ const path = require("path");
 const process = require("process");
 const { authenticate } = require("@google-cloud/local-auth");
 const { google } = require("googleapis");
-const { sendEmail } = require("./util");
+const { sendEmail, findDifferenceByEmail } = require("./util");
+const { v4: uuidv4 } = require("uuid");
 
 // If modifying these scopes, delete token.json and restart server.
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
@@ -13,6 +14,8 @@ const SCOPES = ["https://www.googleapis.com/auth/drive"];
 // time.
 const TOKEN_PATH = path.join(process.cwd(), "token.json");
 const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
+
+const NGROK_PATH = path.join(process.cwd(), "ngrok.json");
 
 const subs = {};
 const state = {};
@@ -131,37 +134,15 @@ async function getPermissions(client, fileId) {
   return usersWithAccess;
 }
 
-let token = null;
-async function getChanges(client) {
-  const drive = google.drive({ version: "v3", auth: client });
-
-  try {
-    if (token == null) {
-      token = (await drive.changes.getStartPageToken()).data.startPageToken;
-    }
-    // const token = await drive.changes.getStartPageToken();
-    const watchRequest = {
-      pageToken: token,
-    };
-    const changes = await drive.changes.list(watchRequest);
-
-    if (changes.length != 0) {
-      token = (await drive.changes.getStartPageToken()).data.startPageToken;
-    }
-
-    return changes.data.changes;
-  } catch (err) {
-    return [];
-  }
-}
-
 async function subscribe(client, fileId, email) {
   const drive = google.drive({ version: "v3", auth: client });
 
-  const file = await drive.files.get({
+  await drive.files.get({
     fileId,
     fields: "name, mimeType",
   });
+
+  await register(client, fileId);
 
   if (subs[fileId]) {
     subs[fileId].push(email);
@@ -170,36 +151,68 @@ async function subscribe(client, fileId, email) {
   }
 
   if (!state[fileId]) {
-    const currPermissions = await getPermissions(client, fileId);
-    state[fileId] = currPermissions;
+    const permissions = await getPermissions(client, fileId);
+    state[fileId] = permissions;
   }
 }
 
-async function pollUpdates() {
-  const client = await authorize();
-  const changes = await getChanges(client);
+async function register(client, fileId) {
+  const drive = google.drive({ version: "v3", auth: client });
 
-  changes.forEach(async (change) => {
-    const fileId = change.fileId;
-    if (subs[fileId]) {
-      const newPermissions = await getPermissions(client, fileId);
-      const added = findDifferenceByEmail(newPermissions, state[fileId]);
-      const removed = findDifferenceByEmail(state[fileId], newPermissions);
+  let credentials = null;
+  try {
+    const content = await fs.readFile(NGROK_PATH);
+    credentials = JSON.parse(content);
+  } catch (err) {
+    throw err;
+  }
 
-      sendEmail(subs[fileId], added, "added to", change.file.name);
-      sendEmail(subs[fileId], removed, "removed from", change.file.name);
+  if (credentials.ngrok == undefined) {
+    throw {
+      status: 500,
+      errors: ["Could not register due to invalid ngrok server"],
+    };
+  }
 
-      state[fileId] = newPermissions;
-    }
-  });
+  const watchReq = {
+    fileId,
+    resource: {
+      id: uuidv4(),
+      type: "web_hook",
+      kind: "api#channel",
+      address: credentials.ngrok,
+    },
+  };
 
-  setTimeout(pollUpdates, 5000);
+  await drive.files.watch(watchReq);
 }
 
-function findDifferenceByEmail(arr1, arr2) {
-  const emails = arr2.map((item) => item["emailAddress"]);
-  const diff = arr1.filter((elem) => !emails.includes(elem["emailAddress"]));
-  return diff;
+async function notifyChanges(fileId) {
+  const client = await authorize();
+
+  if (subs[fileId]) {
+    const newPermissions = await getPermissions(client, fileId);
+
+    const added = findDifferenceByEmail(newPermissions, state[fileId]);
+    const removed = findDifferenceByEmail(state[fileId], newPermissions);
+
+    const name = await getFileName(client, fileId);
+    sendEmail(subs[fileId], added, "added to", name);
+    sendEmail(subs[fileId], removed, "removed from", name);
+
+    state[fileId] = newPermissions;
+  }
+}
+
+async function getFileName(client, fileId) {
+  const drive = google.drive({ version: "v3", auth: client });
+
+  const response = await drive.files.get({
+    fileId,
+    fields: "name",
+  });
+
+  return response.data.name;
 }
 
 module.exports = {
@@ -207,7 +220,6 @@ module.exports = {
   listFiles,
   downloadFile,
   getPermissions,
-  getChanges,
   subscribe,
-  pollUpdates,
+  notifyChanges,
 };

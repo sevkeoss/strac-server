@@ -16,17 +16,23 @@ Finally, users who subscribe to a specific file will receive notifications when 
 
 5. Then, go to [Sign in with app passwords](https://support.google.com/accounts/answer/185833?hl=en) to create an app password for your gmail. This is needed for sending updates through the server.
 
-6. You need to install nodejs on the system. You can follow this link: [Install NodeJS](https://nodejs.org/en)
+6. After that, go to [ngrok setup](https://ngrok.com/docs/getting-started/). Follow the steps to install ngrok and add your authorization token.
 
-7. Download the project from github. `git clone git@github.com:sevkeoss/strac-server.git`.
+7. Once that's done, run `ngrok http 3000`. After running the command, a popup should display. Take the url next to "forwarding". Example: "https://a40c-2600-6c50-b00-292e-d6f1-70a2-ca2b-63b4.ngrok-free.app".
 
-8. Go inside the strac-server folder and copy the "credentials.json" file inside.
+8. You need to install nodejs on the system. You can follow this link: [Install NodeJS](https://nodejs.org/en)
 
-9. Go to the "email.json" file and set "email" of your choice and "appPassword" from before. This is used to send emails to customers.
+9. Download the project from github. `git clone git@github.com:sevkeoss/strac-server.git`.
 
-10. Run `npm install` in the terminal to install all the necessary packages.
+10. Go inside the strac-server folder and copy the "credentials.json" file inside.
 
-11. Run `node app/server.js` in the terminal. For the first time (i.e. you don't see a "token.json" file), it should bring a pop up that you need to go through to give google drive api access to the google drive. After you run this, a "token.json" file should be created and the server should start.
+11. Create an "email.json" file and set "email" of your choice and "appPassword" from before. This is used to send emails to customers.
+
+12. Then, create a "ngrok.json" file and set the "ngrok" value to the be the forwarding url you got after running the `ngrok http 3000` command.
+
+13. Run `npm install` in the terminal to install all the necessary packages.
+
+14. Run `node app/server.js` in the terminal. For the first time (i.e. you don't see a "token.json" file), it should bring a pop up that you need to go through to give google drive api access to the google drive. After you run this, a "token.json" file should be created and the server should start.
 
 #### APIs
 

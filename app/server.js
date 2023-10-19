@@ -5,8 +5,9 @@ const {
   downloadFile,
   getPermissions,
   subscribe,
-  pollUpdates,
+  notifyChanges,
 } = require("./google-drive");
+const { extractFileId } = require("./util");
 
 const app = express();
 const PORT = 3000;
@@ -67,9 +68,25 @@ app.post("/subscribe/:fileId", async (req, res) => {
   }
 });
 
-app.listen(PORT, async () => {
-  console.log(`Server is running on https://localhost:${PORT}`);
-  await authorize();
+app.post("/changes", async (req, res) => {
+  const headers = req.headers;
+
+  if (headers["x-goog-resource-state"] === "update") {
+    const changes = headers["x-goog-changed"].split(",");
+    if (changes.includes("permissions")) {
+      const fileId = extractFileId(headers["x-goog-resource-uri"]);
+      if (fileId == undefined) {
+        res.status(400).send("FileId not provided");
+        return;
+      }
+      console.log(headers);
+      await notifyChanges(fileId);
+    }
+  }
+  res.status(200).send("Ok");
 });
 
-pollUpdates();
+app.listen(PORT, async () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+  await authorize();
+});

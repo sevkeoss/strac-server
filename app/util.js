@@ -49,4 +49,24 @@ async function sendEmail(recipients, users, operation, fileName) {
   });
 }
 
-module.exports = { sendEmail };
+function findDifferenceByEmail(arr1, arr2) {
+  const emails = arr2.map((item) => item["emailAddress"]);
+  const diff = arr1.filter((elem) => !emails.includes(elem["emailAddress"]));
+  return diff;
+}
+
+function extractFileId(resourceUri) {
+  const regex = /\/files\/([^?]+)/;
+
+  // Use the match method to extract the file ID
+  const match = resourceUri.match(regex);
+
+  let fileId = undefined;
+  if (match) {
+    fileId = match[1];
+  }
+
+  return fileId;
+}
+
+module.exports = { sendEmail, findDifferenceByEmail, extractFileId };
